@@ -400,6 +400,7 @@ class ResearchConductor:
                 f"🤔 Researching for relevant information across multiple sources...\n",
                 self.researcher.websocket,
             )
+        
 
         # Scrape the new URLs
         scraped_content = await self.researcher.scraper_manager.browse_urls(new_search_urls)

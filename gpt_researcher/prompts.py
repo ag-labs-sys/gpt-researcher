@@ -68,40 +68,83 @@ def generate_report_prompt(
     reference_prompt = ""
     if report_source == ReportSource.Web.value:
         reference_prompt = f"""
-You MUST write all used source urls at the end of the report as references, and make sure to not add duplicated sources, but only one reference for each.
-Every url should be hyperlinked: [url website](url)
-Additionally, you MUST include hyperlinks to the relevant URLs wherever they are referenced in the report: 
-
-eg: Author, A. A. (Year, Month Date). Title of web page. Website Name. [url website](url)
+You MUST write all used source URLs at the end of the report as references, ensuring that no duplicate sources appear.
+        Each URL should be hyperlinked: [Source Name](URL)
+        Additionally, include hyperlinks within the report for any referenced sources in the following format:
 """
     else:
         reference_prompt = f"""
-You MUST write all used source document names at the end of the report as references, and make sure to not add duplicated sources, but only one reference for each."
+        You MUST list all source document names at the end of the report as references, ensuring that no duplicate sources appear.
 """
 
     tone_prompt = f"Write the report in a {tone.value} tone." if tone else ""
 
     return f"""
+    You are an **epidemiologist with a PhD**, specializing in **disease patterns, risk factors, prevention strategies, and public health implications**. Your expertise allows you to provide **accurate, evidence-based insights** and recommendations. You have an **informative and professional tone of voice** with a **structured and analytical writing style**.
 Information: "{context}"
 ---
-Using the above information, answer the following query or task: "{question}" in a detailed report --
-The report should focus on the answer to the query, should be well structured, informative, 
-in-depth, and comprehensive, with facts and numbers if available and at least {total_words} words.
-You should strive to write the report as long as you can using all relevant and necessary information provided.
+Answer the query: "{question}" in a **detailed, structured epidemiological report**. The report should be **informative, evidence-based, and well-organized**, with a minimum of {total_words} words.
 
-Please follow all of the following guidelines in your report:
-- You MUST determine your own concrete and valid opinion based on the given information. Do NOT defer to general and meaningless conclusions.
-- You MUST write the report with markdown syntax and {report_format} format.
-- You MUST prioritize the relevance, reliability, and significance of the sources you use. Choose trusted sources over less reliable ones.
-- You must also prioritize new articles over older articles if the source can be trusted.
-- Use in-text citation references in {report_format} format and make it with markdown hyperlink placed at the end of the sentence or paragraph that references them like this: ([in-text citation](url)).
-- Don't forget to add a reference list at the end of the report in {report_format} format and full url links without hyperlinks.
+## **Report Structure and Sections**
+The report should contain the following key sections:
+
+### ** Introduction**
+GIve the detail introduction about the disease. mentioned in the query
+
+### **1. Epidemiology** 
+This section provides an overview of the disease's epidemiology, 
+including global prevalence and key demographic factors. 
+It should discuss the total number of affected individuals worldwide, 
+along with variations across regions such as the U.S., EU4+UK, and the Rest of the World (ROW). 
+Additionally, it should highlight risk factors such as age, gender, genetic predisposition, 
+and environmental triggers. Trends in incidence rates over time should be explored, 
+identifying any regional disparities or changes due to improved awareness, diagnostic advancements, 
+or emerging treatment options.
+
+### **2. Prevalence and Diagnosis Rates**
+| Region       | Total Prevalent Patients | Diagnosed Patients | Diagnosed % of Prevalence |
+|-------------|-------------------------|--------------------|---------------------------|
+| U.S.        |                         |                    |                           |
+| EU4+UK      |                         |                    |                           |
+| ROW         |                         |                    |                           |
+
+- Provide a detailed analysis of diagnosis trends across regions.
+
+### **3. Treated Patients**
+| Region       | Total Treated Patients | Treated % of Diagnosed |
+|-------------|------------------------|------------------------|
+| U.S.        |                        |                        |
+| EU4+UK      |                        |                        |
+| ROW         |                        |                        |
+
+- Discuss factors influencing treatment rates, including **access to therapies, healthcare policies, and drug availability**.
+
+### **4. Disease Stage Segmentation**
+| Stage          | % Treated in U.S. | % Treated in EU4+UK | % Treated in ROW |
+|---------------|------------------|--------------------|------------------|
+| Early-Stage  |                  |                    |                  |
+| Moderate-Stage |                  |                    |                  |
+| Severe       |                  |                    |                  |
+| End-Stage   |                  |                    |                  |
+
+- Assess treatment distribution by disease stage and **healthcare system variations**.
+
+### **5. Forecast Insights**
+- Provide **data-driven projections** on prevalence, diagnosis, and treatment trends.
+- Highlight **expected growth rates (CAGR)** and **treatment innovations** (e.g., biosimilars, biologics, JAK inhibitors).
+- Compare future trends between **U.S., EU4+UK, and ROW**.
+
+## **Guidelines**
+- You MUST determine a **concrete, evidence-based conclusion** from the given data.
+- Write the report using **markdown syntax** and **{report_format} format**.
+- Use **reliable and recent sources** over outdated materials.
+- Ensure all in-text citations follow {report_format} format and are **hyperlinked** in markdown.
+- Don't forget to add a **reference list** at the end of the report.
 - {reference_prompt}
 - {tone_prompt}
 
-You MUST write the report in the following language: {language}.
-Please do your best, this is very important to my career.
-Assume that the current date is {date.today()}.
+The report must be written in **{language}**.
+Assume today's date is **{date.today()}**.
 """
 
 def curate_sources(query, sources, max_results=10):
@@ -203,6 +246,7 @@ def generate_outline_report_prompt(
     )
 
 
+
 def generate_deep_research_prompt(
     question: str,
     context: str,
@@ -212,7 +256,7 @@ def generate_deep_research_prompt(
     total_words=2000,
     language: str = "english"
 ):
-    """Generates the deep research report prompt, specialized for handling hierarchical research results.
+    """Generates the deep research report prompt with an epidemiological analysis structure.
     Args:
         question (str): The research question
         context (str): The research context containing learnings with citations
@@ -225,53 +269,90 @@ def generate_deep_research_prompt(
         str: The deep research report prompt
     """
     reference_prompt = ""
-    if report_source == ReportSource.Web.value:
+    if report_source == "web":
         reference_prompt = f"""
-You MUST write all used source urls at the end of the report as references, and make sure to not add duplicated sources, but only one reference for each.
-Every url should be hyperlinked: [url website](url)
-Additionally, you MUST include hyperlinks to the relevant URLs wherever they are referenced in the report: 
+You MUST write all used source URLs at the end of the report as references, ensuring no duplicates. Each reference should be hyperlinked:
 
-eg: Author, A. A. (Year, Month Date). Title of web page. Website Name. [url website](url)
-"""
+**Example:** Author, A. A. (Year, Month Date). Title of web page. Website Name. [URL](URL)
+        """
     else:
         reference_prompt = f"""
-You MUST write all used source document names at the end of the report as references, and make sure to not add duplicated sources, but only one reference for each."
-"""
-
-    tone_prompt = f"Write the report in a {tone.value} tone." if tone else ""
+You MUST write all used source document names at the end of the report as references, ensuring no duplicates.
+        """
+    
+    tone_prompt = f"Write the report in a {tone} tone." if tone else ""
     
     return f"""
-Using the following hierarchically researched information and citations:
+### **Role and Expertise**
+You are an **epidemiologist with a PhD**, specializing in **disease patterns, risk factors, prevention strategies, and public health implications**. You provide **accurate, evidence-based insights** with a **structured and analytical writing style**.
 
+## **Context and Research Question**
+**Research Context:**
 "{context}"
 
-Write a comprehensive research report answering the query: "{question}"
+**Research Question:**
+"{question}"
 
-The report should:
-1. Synthesize information from multiple levels of research depth
-2. Integrate findings from various research branches
-3. Present a coherent narrative that builds from foundational to advanced insights
-4. Maintain proper citation of sources throughout
-5. Be well-structured with clear sections and subsections
-6. Have a minimum length of {total_words} words
-7. Follow {report_format} format with markdown syntax
+## **Report Structure and Sections**
+Ensure the report follows this structured approach:
+### **1. Epidemiology** 
+This section provides an overview of the disease's epidemiology, 
+including global prevalence and key demographic factors. 
+It should discuss the total number of affected individuals worldwide, 
+along with variations across regions such as the U.S., EU4+UK, and the Rest of the World (ROW). 
+Additionally, it should highlight risk factors such as age, gender, genetic predisposition, 
+and environmental triggers. Trends in incidence rates over time should be explored, 
+identifying any regional disparities or changes due to improved awareness, diagnostic advancements, 
+or emerging treatment options.
 
-Additional requirements:
-- Prioritize insights that emerged from deeper levels of research
-- Highlight connections between different research branches
-- Include relevant statistics, data, and concrete examples
-- You MUST determine your own concrete and valid opinion based on the given information. Do NOT defer to general and meaningless conclusions.
-- You MUST prioritize the relevance, reliability, and significance of the sources you use. Choose trusted sources over less reliable ones.
-- You must also prioritize new articles over older articles if the source can be trusted.
-- Use in-text citation references in {report_format} format and make it with markdown hyperlink placed at the end of the sentence or paragraph that references them like this: ([in-text citation](url)).
+### **2. Prevalence and Diagnosis Rates**
+| Region  | Total Prevalent Patients | Diagnosed Patients | Diagnosed % of Prevalence |
+|---------|-------------------------|---------------------|--------------------------|
+| U.S.    | TBD                     | TBD                 | TBD                      |
+| EU4+UK  | TBD                     | TBD                 | TBD                      |
+| ROW     | TBD                     | TBD                 | TBD                      |
+
+- Analyze diagnosis trends across regions and **factors affecting early detection**.
+
+### **3. Treated Patients**
+| Region  | Total Treated Patients | Treated % of Diagnosed |
+|---------|-----------------------|------------------------|
+| U.S.    | TBD                   | TBD                    |
+| EU4+UK  | TBD                   | TBD                    |
+| ROW     | TBD                   | TBD                    |
+
+- Explain **treatment accessibility**, including **healthcare policies and drug availability**.
+
+### **4. Disease Stage Segmentation**
+| Stage             | % Treated in U.S. | % Treated in EU4+UK | % Treated in ROW |
+|------------------|------------------|--------------------|------------------|
+| Early-Stage     | TBD              | TBD                | TBD              |
+| Moderate-Stage  | TBD              | TBD                | TBD              |
+| Severe          | TBD              | TBD                | TBD              |
+| End-Stage       | TBD              | TBD                | TBD              |
+
+- Discuss **variations in treatment across disease stages** and **regional healthcare challenges**.
+
+### **5. Forecast Insights**
+- Provide **data-driven projections** on prevalence, diagnosis, and treatment trends.
+- Highlight **expected growth rates (CAGR)** and innovations in treatment (e.g., biosimilars, biologics, JAK inhibitors).
+- Compare future trends across **U.S., EU4+UK, and ROW**.
+
+## **Additional Requirements**
+- **Minimum length:** {total_words} words.
+- **Formatting style:** {report_format}, using markdown syntax.
+- **Language:** {language}.
+- Use **in-text citations** formatted as: ([citation](URL)).
 - {tone_prompt}
-- Write in {language}
 
 {reference_prompt}
 
-Please write a thorough, well-researched report that synthesizes all the gathered information into a cohesive whole.
-Assume the current date is {datetime.now(timezone.utc).strftime('%B %d, %Y')}.
-"""
+### **Final Instructions**
+Write a comprehensive, well-researched report synthesizing all gathered information into a cohesive whole.
+
+**Date:** {datetime.now(timezone.utc).strftime('%B %d, %Y')}
+    """
+
 
 
 def auto_agent_instructions():
@@ -331,11 +412,13 @@ and research data:
 
 {data}
 
-- Construct a list of subtopics which indicate the headers of a report document to be generated on the task. 
-- These are a possible list of subtopics : {subtopics}.
-- There should NOT be any duplicate subtopics.
-- Limit the number of subtopics to a maximum of {max_subtopics}
-- Finally order the subtopics by their tasks, in a relevant and meaningful order which is presentable in a detailed report
+- Construct a list of subtopics that serve as headers for a detailed analysis report.
+- These reports assist in drug development by focusing on one particular disease and conducting deep research to generate different sections of the report.
+- These sections are used in drug development analysis.
+- These are a possible list of subtopics: {subtopics}.
+- There should NOT be any duplicate subtopics and no duplication of headings.
+- Limit the number of subtopics to a maximum of {max_subtopics}.
+- Finally, order the subtopics by their relevance and logical sequence for a detailed report.
 
 "IMPORTANT!":
 - Every subtopic MUST be relevant to the main topic and provided research data ONLY!
@@ -343,6 +426,8 @@ and research data:
 {format_instructions}
 """
 
+
+from datetime import datetime, timezone
 
 def generate_subtopic_report_prompt(
     current_subtopic,
@@ -357,149 +442,192 @@ def generate_subtopic_report_prompt(
     language: str = "english",
 ) -> str:
     return f"""
-Context:
+### **Context**
 "{context}"
 
-Main Topic and Subtopic:
-Using the latest information available, construct a detailed report on the subtopic: {current_subtopic} under the main topic: {main_topic}.
-You must limit the number of subsections to a maximum of {max_subsections}.
 
-Content Focus:
-- The report should focus on answering the question, be well-structured, informative, in-depth, and include facts and numbers if available.
-- Use markdown syntax and follow the {report_format.upper()} format.
+## **Report Structure**
+Ensure the report follows this structured approach:
 
-IMPORTANT:Content and Sections Uniqueness:
-- This part of the instructions is crucial to ensure the content is unique and does not overlap with existing reports.
-- Carefully review the existing headers and existing written contents provided below before writing any new subsections.
-- Prevent any content that is already covered in the existing written contents.
-- Do not use any of the existing headers as the new subsection headers.
-- Do not repeat any information already covered in the existing written contents or closely related variations to avoid duplicates.
-- If you have nested subsections, ensure they are unique and not covered in the existing written contents.
-- Ensure that your content is entirely new and does not overlap with any information already covered in the previous subtopic reports.
+### **1. Epidemiology** 
+This section provides an overview of the disease's epidemiology, 
+including global prevalence and key demographic factors. 
+It should discuss the total number of affected individuals worldwide, 
+along with variations across regions such as the U.S., EU4+UK, and the Rest of the World (ROW). 
+Additionally, it should highlight risk factors such as age, gender, genetic predisposition, 
+and environmental triggers. Trends in incidence rates over time should be explored, 
+identifying any regional disparities or changes due to improved awareness, diagnostic advancements, 
+or emerging treatment options.
 
-"Existing Subtopic Reports":
-- Existing subtopic reports and their section headers:
+### **2. Prevalence and Diagnosis Rates**
+| Region        | Total Prevalent Patients | Diagnosed Patients | Diagnosed % of Prevalence |
+|--------------|-------------------------|---------------------|--------------------------|
+| U.S.         | TBD                     | TBD                 | TBD                      |
+| EU4+UK       | TBD                     | TBD                 | TBD                      |
+| ROW          | TBD                     | TBD                 | TBD                      |
 
-    {existing_headers}
+- Provide a detailed analysis of diagnosis trends across regions.
 
-- Existing written contents from previous subtopic reports:
+### **3. Treated Patients**
+| Region        | Total Treated Patients | Treated % of Diagnosed |
+|--------------|-----------------------|------------------------|
+| U.S.         | TBD                   | TBD                    |
+| EU4+UK       | TBD                   | TBD                    |
+| ROW          | TBD                   | TBD                    |
 
-    {relevant_written_contents}
+- Explain **factors influencing treatment rates** (e.g., healthcare policies, drug availability).
 
-"Structure and Formatting":
-- As this sub-report will be part of a larger report, include only the main body divided into suitable subtopics without any introduction or conclusion section.
+### **4. Disease Stage Segmentation**
+| Stage               | % Treated in U.S. | % Treated in EU4+UK | % Treated in ROW |
+|---------------------|------------------|--------------------|------------------|
+| Early-Stage RA     | TBD              | TBD                | TBD              |
+| Moderate-Stage RA  | TBD              | TBD                | TBD              |
+| Severe RA          | TBD              | TBD                | TBD              |
+| End-Stage RA       | TBD              | TBD                | TBD              |
 
-- You MUST include markdown hyperlinks to relevant source URLs wherever referenced in the report, for example:
+- Analyze **how treatment varies by disease stage** and **regional healthcare systems**.
 
-    ### Section Header
-    
-    This is a sample text ([in-text citation](url)).
+### **5. Forecast Insights**
+- Provide **data-driven projections** on **prevalence, diagnosis, and treatment trends**.
+- Highlight **expected growth rates (CAGR)** and **innovations in treatment** (e.g., biosimilars, biologics, JAK inhibitors).
+- Compare future trends across **U.S., EU4+UK, and ROW**.
 
-- Use H2 for the main subtopic header (##) and H3 for subsections (###).
-- Use smaller Markdown headers (e.g., H2 or H3) for content structure, avoiding the largest header (H1) as it will be used for the larger report's heading.
-- Organize your content into distinct sections that complement but do not overlap with existing reports.
-- When adding similar or identical subsections to your report, you should clearly indicate the differences between and the new content and the existing written content from previous subtopic reports. For example:
+### **Formatting and Style**
+- Use **markdown syntax** with structured headers (`##` for main sections, `###` for subsections).
+- **Cite sources** using **markdown hyperlinks** ([example](url)).
+- Ensure the **report length is at least {total_words} words**.
+- The report must be **in {language}**.
+- **Tone:** {tone.value} (Maintain a professional, evidence-based style).
+- **Avoid introduction, conclusion, or summary sections**.
+- Ensure **zero overlap** with existing content.
 
-    ### New header (similar to existing header)
-
-    While the previous section discussed [topic A], this section will explore [topic B]."
-
-"Date":
-Assume the current date is {datetime.now(timezone.utc).strftime('%B %d, %Y')} if required.
-
-"IMPORTANT!":
-- You MUST write the report in the following language: {language}.
-- The focus MUST be on the main topic! You MUST Leave out any information un-related to it!
-- Must NOT have any introduction, conclusion, summary or reference section.
-- You MUST use in-text citation references in {report_format.upper()} format and make it with markdown hyperlink placed at the end of the sentence or paragraph that references them like this: ([in-text citation](url)).
-- You MUST mention the difference between the existing content and the new content in the report if you are adding the similar or same subsections wherever necessary.
-- The report should have a minimum length of {total_words} words.
-- Use an {tone.value} tone throughout the report.
-
-Do NOT add a conclusion section.
+**Date:** {datetime.now(timezone.utc).strftime('%B %d, %Y')}
 """
+
+
 
 
 def generate_draft_titles_prompt(
     current_subtopic: str,
     main_topic: str,
     context: str,
-    max_subsections: int = 5
+    max_subsections: int = 1
 ) -> str:
+    """
+    Generate structured draft section title headers for a detailed epidemiological report.
+
+    Args:
+        current_subtopic (str): The specific subtopic of the report.
+        main_topic (str): The overarching main topic.
+        context (str): Background context for generating relevant section headers.
+        max_subsections (int): The maximum number of subsections to generate.
+
+    Returns:
+        str: A structured prompt guiding the generation of draft section titles.
+    """
     return f"""
-"Context":
-"{context}"
+    ### **Context**
+    - **Main Topic:** {main_topic}
+    - **Subtopic:** {current_subtopic}
+    - **Relevant Background Information:**  
+      {context}
 
-"Main Topic and Subtopic":
-Using the latest information available, construct a draft section title headers for a detailed report on the subtopic: {current_subtopic} under the main topic: {main_topic}.
+    ### **Task**
+    You are an **epidemiologist** specializing in **disease trends, risk factors, treatment patterns, and public health strategies**.  
+    Your task is to **generate structured draft section headers** for a **detailed epidemiological report** on the subtopic:  
+    **{current_subtopic}**, under the broader topic of **{main_topic}**.
 
-"Task":
-1. Create a list of draft section title headers for the subtopic report.
-2. Each header should be concise and relevant to the subtopic.
-3. The header should't be too high level, but detailed enough to cover the main aspects of the subtopic.
-4. Use markdown syntax for the headers, using H3 (###) as H1 and H2 will be used for the larger report's heading.
-5. Ensure the headers cover main aspects of the subtopic.
+    ### **Guidelines**
+    2. Each header should be:
+        - **Concise, clear, and specific** to the subtopic.
+        - **Not too high-level**, but **detailed enough** to capture key epidemiological aspects.
+        - **Relevant to the main topic** (avoid unrelated information).
+    3. Use **Markdown formatting**:
+        - **H3 (###) for section headers** (since H1 and H2 are reserved for the full report).
+    4. The sections **must NOT** include:
+        - Introduction
+        - Epidemiology
+        - Prevalence and Diagnosis Rates
+        - Treated Patients
+        - Disease Stage Segmentation
+        - Forecast Insights
+        - Conclusion
+        - References
+    5. Each section should be once only, no repeating
+    6. {max_subsections} 
 
-"Structure and Formatting":
-Provide the draft headers in a list format using markdown syntax, for example:
+    ### **Example Structure**
+    Provide the draft section headers in **Markdown list format**, such as:
 
-### Header 1
-### Header 2
-### Header 3
+    ### Prevalence and Demographics  
+    ### Risk Factors and Disease Progression  
+    ### Diagnosis and Screening Trends  
+    ### Treatment Strategies and Access Disparities  
+    ### Public Health Interventions  
 
-"IMPORTANT!":
-- The focus MUST be on the main topic! You MUST Leave out any information un-related to it!
-- Must NOT have any introduction, conclusion, summary or reference section.
-- Focus solely on creating headers, not content.
-"""
+    **Now, generate the draft headers for the subtopic: "{current_subtopic}".**
+    
+    """
+
+
 
 
 def generate_report_introduction(question: str, research_summary: str = "", language: str = "english", report_format: str = "apa") -> str:
-    return f"""{research_summary}\n 
-Using the above latest information, Prepare a detailed report introduction on the topic -- {question}.
-- The introduction should be succinct, well-structured, informative with markdown syntax.
-- As this introduction will be part of a larger report, do NOT include any other sections, which are generally present in a report.
-- The introduction should be preceded by an H1 heading with a suitable topic for the entire report.
-- You must use in-text citation references in {report_format.upper()} format and make it with markdown hyperlink placed at the end of the sentence or paragraph that references them like this: ([in-text citation](url)).
-Assume that the current date is {datetime.now(timezone.utc).strftime('%B %d, %Y')} if required.
-- The output must be in {language} language.
+    return f"""{research_summary}\n
+You are an **epidemiologist with a PhD**, specializing in **disease patterns, risk factors, prevention strategies, and public health implications**. Your expertise allows you to provide **accurate, evidence-based insights** and recommendations. You have an **informative and professional tone of voice** with a **structured and analytical writing style**.
+
+Using the latest available information, **prepare a detailed introduction** for a comprehensive epidemiological report on the topic -- {question}.
+
+### **Introduction Requirements:**
+- The introduction should be **succinct, well-structured, and informative**, using markdown syntax.
+- As this introduction is part of a larger **epidemiological report**, do **NOT** include other sections (e.g., methods, results, discussion).
+- The introduction should start with an **H1 heading** summarizing the broader **public health relevance** of the topic.
+- Use **evidence-based insights** and support key statements with **in-text citations** in {report_format.upper()} format.
+- In-text citations must be formatted as **markdown hyperlinks** placed at the **end of relevant sentences** (e.g., *([in-text citation](url))*).
+- Assume that the current date is **{datetime.now(timezone.utc).strftime('%B %d, %Y')}** if required.
+- The output must be in **{language}**.
 """
 
 
 def generate_report_conclusion(query: str, report_content: str, language: str = "english", report_format: str = "apa") -> str:
     """
-    Generate a concise conclusion summarizing the main findings and implications of a research report.
+    Generate a structured and evidence-based conclusion summarizing the key epidemiological insights of a research report.
 
     Args:
         query (str): The research task or question.
         report_content (str): The content of the research report.
         language (str): The language in which the conclusion should be written.
+        report_format (str): The citation format (default: APA).
 
     Returns:
-        str: A concise conclusion summarizing the report's main findings and implications.
+        str: A well-structured conclusion summarizing the report’s key epidemiological findings, implications, and recommendations.
     """
     prompt = f"""
-    Based on the research report below and research task, please write a concise conclusion that summarizes the main findings and their implications:
-    
-    Research task: {query}
-    
-    Research Report: {report_content}
+    You are an **epidemiologist with a PhD**, specializing in **disease patterns, risk factors, prevention strategies, and public health implications**. 
+    Your expertise allows you to provide **data-driven conclusions** that highlight key findings and their impact.
 
-    Your conclusion should:
-    1. Recap the main points of the research
-    2. Highlight the most important findings
-    3. Discuss any implications or next steps
-    4. Be approximately 2-3 paragraphs long
-    
-    If there is no "## Conclusion" section title written at the end of the report, please add it to the top of your conclusion. 
-    You must use in-text citation references in {report_format.upper()} format and make it with markdown hyperlink placed at the end of the sentence or paragraph that references them like this: ([in-text citation](url)).
+    ### **Task:**
+    Based on the **epidemiological report** below and the research task, write a **structured conclusion** that summarizes the key findings and implications:
 
-    IMPORTANT: The entire conclusion MUST be written in {language} language.
+    **Research Task:** {query}  
+    **Epidemiological Report Content:** {report_content}
 
-    Write the conclusion:
+
+    ### **Conclusion Requirements:**
+    - Recap the **main epidemiological findings** of the report.
+    - Highlight **disease prevalence, risk factors, treatment trends, and healthcare policy implications**.
+    - Discuss **public health impacts, future projections, and recommendations** for disease management.
+    - Structure the conclusion into **2-3 well-organized paragraphs**.
+    - If a **"## Conclusion"** section title is missing at the end of the report, **add it** at the top of your conclusion.
+    - Use **in-text citations** in {report_format.upper()} format, formatted as **markdown hyperlinks** placed at the **end of relevant sentences** (e.g., *([in-text citation](url))*).
+    - Assume the **current date** is **{datetime.now(timezone.utc).strftime('%B %d, %Y')}** if required.
+    - The output **must** be in **{language}**.
+
+    Now, generate the **conclusion**:
     """
 
     return prompt
+
 
 
 report_type_mapping = {

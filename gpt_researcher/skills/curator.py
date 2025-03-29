@@ -63,7 +63,7 @@ class SourceCurator:
                     f"🏅 Verified and ranked top {len(curated_sources)} most reliable sources",
                     self.researcher.websocket,
                 )
-
+            print(curated_sources)
             return curated_sources
 
         except Exception as e:
